@@ -74,22 +74,23 @@ There are **two** plugins here, deployed differently on purpose.
 2. In Claude admin settings, go to **Organization → Plugins**, add this repo as a
    plugin marketplace.
 3. Set **`model-routing`** to **auto-install** for everyone.
-4. Assign **`model-routing-note`** to a small group only. Pick one engineer, one
-   marketer, one client success person — the point is to see it across different
-   kinds of work.
+4. Assign **`model-routing-note`** to a small group only. Pick people who do
+   genuinely different kinds of work — the point is to see how it lands across
+   writing, data, and code, not just one of them.
 
 Everyone picks their assignment up on next sign-in.
 
 ### Why the note is piloted rather than shipped
 
 `model-routing` is mechanical: it fixes which model a subagent runs on and nothing
-else. Nobody will notice it, which is exactly why it's safe to give to 24 people.
+else. Nobody will notice it, which is exactly why it's safe to give to the whole team.
 
 `model-routing-note` tells sessions to delegate by default, and delegation costs a
 round trip — measured median is about 160 seconds. That's a good trade on a
 half-hour task and a bad one on a quick question. Run it with a few people for a week
-and ask them one thing: **did anything get slower?** If the marketer says yes and the
-engineer says no, the note needs a different floor before it goes wide.
+and ask them one thing: **did anything get slower?** If the people doing short,
+conversational work say yes while the people doing long build work say no, the note
+needs a different floor before it goes wide.
 
 For anyone using the Claude Code CLI rather than the desktop app, add this to managed
 settings as well. **Both keys are needed** — the first registers the source, the second
