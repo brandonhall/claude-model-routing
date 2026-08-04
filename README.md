@@ -80,5 +80,18 @@ The session note is in `plugins/model-routing/hooks/session-start`.
 
 ## Checking it worked
 
-Run `/agents` in any session. The four assistants should be listed with the models
+Run `/agents` in any session. The five assistants should be listed with the models
 above. If they are, it's live.
+
+For whether it's actually changing behavior, run this on any machine:
+
+```bash
+python3 check-delegation.py
+```
+
+It prints one number — what share of tokens went to assistants rather than the main
+session — plus which models each side ran on. Higher is better. Run it before rollout
+and again a few weeks later; if the delegated share went up, it's working.
+
+It reads only the local logs in `~/.claude/projects`, never prompts, file contents,
+paths, or branch names, and prints only aggregate numbers.
