@@ -1,12 +1,12 @@
 {
   "hooks": {
-    "PreToolUse": [
+    "SessionStart": [
       {
-        "matcher": "Agent|Task",
+        "matcher": "startup|resume|clear|compact|fork",
         "hooks": [
           {
             "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/default-subagent-model.py\"",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/session-start\"",
             "async": false
           }
         ]

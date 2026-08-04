@@ -27,9 +27,10 @@ Assistants finish their own piece and never stall waiting on a decision — they
 on a stated assumption and flag it. The session owns finishing the whole project, and
 uses `checker` to confirm it rather than trusting its own summary.
 
-It also attaches a short note to the start of every session that makes delegation the
-default rather than the exception: the expensive session plans, dispatches, integrates,
-and decides, and hands out everything else. Nobody has to invoke it.
+The second plugin, `model-routing-note`, attaches a short note to the start of every
+session making delegation the default rather than the exception: the expensive session
+plans, dispatches, integrates, and decides, and hands out everything else. Nobody has to
+invoke it. That one is meant to be piloted first — see Deploy below.
 
 ### Subagents that aren't one of these five
 
@@ -62,12 +63,33 @@ small and every later turn in that session is cheaper too.
 
 ## Deploy
 
+There are **two** plugins here, deployed differently on purpose.
+
+| Plugin               | Who gets it        | Why                                              |
+| -------------------- | ------------------ | ------------------------------------------------ |
+| `model-routing`      | Everyone           | Silent. Nothing changes about how the tool feels. |
+| `model-routing-note` | A pilot group of 3–4 | Changes behavior. Try it before inflicting it.  |
+
 1. Push this repo somewhere the team can reach it. A private GitHub repo is fine.
 2. In Claude admin settings, go to **Organization → Plugins**, add this repo as a
    plugin marketplace.
-3. Set the `model-routing` plugin to **auto-install**.
+3. Set **`model-routing`** to **auto-install** for everyone.
+4. Assign **`model-routing-note`** to a small group only. Pick one engineer, one
+   marketer, one client success person — the point is to see it across different
+   kinds of work.
 
-Everyone picks it up on next sign-in.
+Everyone picks their assignment up on next sign-in.
+
+### Why the note is piloted rather than shipped
+
+`model-routing` is mechanical: it fixes which model a subagent runs on and nothing
+else. Nobody will notice it, which is exactly why it's safe to give to 24 people.
+
+`model-routing-note` tells sessions to delegate by default, and delegation costs a
+round trip — measured median is about 160 seconds. That's a good trade on a
+half-hour task and a bad one on a quick question. Run it with a few people for a week
+and ask them one thing: **did anything get slower?** If the marketer says yes and the
+engineer says no, the note needs a different floor before it goes wide.
 
 For anyone using the Claude Code CLI rather than the desktop app, add this to managed
 settings as well. **Both keys are needed** — the first registers the source, the second
@@ -93,11 +115,11 @@ Each assistant is one short file in `plugins/model-routing/agents/`. Two lines m
 - `model:` which engine it runs on
 - `description:` when Claude should hand work to it
 
-Edit, commit, push — **and bump `version` in
-`plugins/model-routing/.claude-plugin/plugin.json`**. If the version string doesn't
-change, updates are skipped and your edit never reaches anyone.
+Edit, commit, push — **and bump `version` in that plugin's
+`.claude-plugin/plugin.json`**. If the version string doesn't change, updates are
+skipped and your edit never reaches anyone.
 
-The session note is in `plugins/model-routing/hooks/session-start`.
+The session note is in `plugins/model-routing-note/hooks/session-start`.
 
 ## Checking it worked
 

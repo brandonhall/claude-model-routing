@@ -5,7 +5,12 @@
     {
       "name": "model-routing",
       "source": "./plugins/model-routing",
-      "description": "Routes routine work to faster, cheaper Claude models automatically."
+      "description": "Five assistants pinned to fast, low-cost models, and a default model for subagents that don't name one. Safe for everyone."
+    },
+    {
+      "name": "model-routing-note",
+      "source": "./plugins/model-routing-note",
+      "description": "Standing note telling sessions to delegate by default. Pilot before rolling out."
     }
   ]
 }
