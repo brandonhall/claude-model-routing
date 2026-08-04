@@ -16,6 +16,14 @@ Two rules, both important:
 That leaves exactly the case this is for: a generic worker with no model of its own.
 
 Any failure here is silent and harmless: the spawn proceeds exactly as it would have.
+
+Known dead zone: under CLAUDE_CODE_COORDINATOR_MODE the Agent tool drops the model
+field entirely, so this hook has no effect there. Nothing to fix, just don't be
+surprised by it.
+
+Verified against the Claude Code 2.1.195 binary: `permissionDecision: "allow"` plus
+`updatedInput` is applied to the Agent tool, and the Agent input schema accepts
+`model` as one of sonnet/opus/haiku/fable.
 """
 
 import json
@@ -47,6 +55,10 @@ def main():
     if agent and agent not in GENERIC_AGENTS:
         return
 
+    # DO NOT "simplify" this to {"model": DEFAULT_MODEL}. `updatedInput` REPLACES the
+    # whole input object and is validated against the Agent tool's full schema, so a
+    # partial object fails validation on the missing required fields and the spawn is
+    # DENIED. Copy everything, then add the one field.
     updated = dict(tool_input)
     updated["model"] = DEFAULT_MODEL
 
