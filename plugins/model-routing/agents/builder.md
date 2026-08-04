@@ -1,6 +1,6 @@
 ---
 name: builder
-description: Use to complete a scoped piece of work once the direction is settled - a client email, help article, release note, marketing section, ticket reply, config change, test, or a bounded code change. Completes the piece end to end and reports what it verified and what it assumed. Do NOT use when the direction itself is still open; settle that first, then hand it over.
+description: Use to complete a scoped piece of work once the direction is settled - a client email, help article, release note, marketing section, ticket reply, config change, test, documentation, or a bounded code change. This is the default worker; when no other assistant fits the task, use this one. Completes the piece end to end and reports what it verified and what it assumed. Do NOT use when the direction itself is still open; settle that first, then hand it over.
 tools: Read, Grep, Glob, Write, Edit, Bash
 model: sonnet
 ---

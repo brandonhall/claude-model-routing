@@ -1,9 +1,11 @@
 # Model routing
 
-Sends routine work to faster, cheaper Claude models automatically, for everyone, with
-nothing for anyone to remember or type.
+Lets people keep Opus or Fable as their main session while the actual work gets farmed
+out to faster, cheaper models. Applies to everyone automatically, with nothing to
+remember or type.
 
-No model is blocked. Anyone can still choose Opus or Fable at any time.
+No model is blocked. Anyone can still choose Opus or Fable at any time — that's the
+point. The expensive model stays; it just stops doing the grinding.
 
 ## What it adds
 
@@ -25,9 +27,23 @@ Assistants finish their own piece and never stall waiting on a decision — they
 on a stated assumption and flag it. The session owns finishing the whole project, and
 uses `checker` to confirm it rather than trusting its own summary.
 
-It also attaches a short note to the start of every session covering when to hand work
-off, when not to, and how to run independent pieces in parallel. Nobody has to invoke
-it.
+It also attaches a short note to the start of every session that makes delegation the
+default rather than the exception: the expensive session plans, dispatches, integrates,
+and decides, and hands out everything else. Nobody has to invoke it.
+
+### Why farming out wins even on small tasks
+
+A handoff isn't free — it costs a fresh context plus a report to read back, roughly
+1.5× the raw tokens. But the model prices are 3–10× apart, so the trade is lopsided:
+
+| Path                              | Relative cost |
+| --------------------------------- | ------------- |
+| Fable does it directly            | 1.0×          |
+| Sonnet does it, including handoff | ~0.45×        |
+| Haiku does it, including handoff  | ~0.15×        |
+
+It's better still against 5-hour usage limits, because the main session's context stays
+small and every later turn in that session is cheaper too.
 
 ## Deploy
 
