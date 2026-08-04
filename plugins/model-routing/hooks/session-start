@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Attaches the delegation note to the start of every session.
+set -euo pipefail
+
+cat <<'JSON'
+{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"Shared assistants are available in this workspace and should be used by default for volume work:\n\n- finder: locate files, docs, tickets, or records\n- researcher: read external documentation and report back\n- drafter: produce a first version once the direction is settled\n- analyst: spreadsheets, data pulls, and reducing long output\n\nHand off work whose cost is reading or producing a lot of material. Keep planning, judgment, synthesis, and final review here.\n\nDo not hand off work you could finish yourself in a few steps. Each handoff costs a fresh context plus a report to read back, so delegating two file reads is a net loss.\n\nBefore acting on anything consequential an assistant reports, verify it at the source yourself."}}
+JSON

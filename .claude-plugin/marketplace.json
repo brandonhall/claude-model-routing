@@ -1,0 +1,11 @@
+{
+  "name": "claude-model-routing",
+  "owner": { "name": "Internal" },
+  "plugins": [
+    {
+      "name": "model-routing",
+      "source": "./plugins/model-routing",
+      "description": "Routes routine work to faster, cheaper Claude models automatically."
+    }
+  ]
+}
