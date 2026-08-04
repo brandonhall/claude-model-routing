@@ -7,21 +7,27 @@ No model is blocked. Anyone can still choose Opus or Fable at any time.
 
 ## What it adds
 
-Four shared assistants that any team member's Claude can hand work off to:
+Five shared assistants that any team member's Claude can hand work off to:
 
-| Assistant    | Runs on | Handles                                          |
-| ------------ | ------- | ------------------------------------------------ |
-| `finder`     | Haiku   | Locating files, docs, tickets, records           |
+| Assistant    | Runs on | Handles                                           |
+| ------------ | ------- | ------------------------------------------------- |
+| `finder`     | Haiku   | Locating files, docs, tickets, records            |
 | `researcher` | Sonnet  | Reading external documentation and reporting back |
-| `drafter`    | Sonnet  | First versions of writing or code                |
-| `analyst`    | Sonnet  | Spreadsheets, data pulls, reducing long output   |
+| `builder`    | Sonnet  | Completing a scoped piece of work end to end      |
+| `analyst`    | Sonnet  | Spreadsheets, data pulls, reducing long output    |
+| `checker`    | Sonnet  | Independently verifying finished work             |
 
 The model is fixed in each assistant's file, so this work lands on a fast, low-cost
 model whether or not the person thinks about it. The expensive model stays on the
-planning and judgment, which is what it's for.
+planning, integration, and final call, which is what it's for.
 
-It also attaches a short note to the start of every session saying when to hand work
-off and when not to. Nobody has to invoke it.
+Assistants finish their own piece and never stall waiting on a decision — they proceed
+on a stated assumption and flag it. The session owns finishing the whole project, and
+uses `checker` to confirm it rather than trusting its own summary.
+
+It also attaches a short note to the start of every session covering when to hand work
+off, when not to, and how to run independent pieces in parallel. Nobody has to invoke
+it.
 
 ## Deploy
 

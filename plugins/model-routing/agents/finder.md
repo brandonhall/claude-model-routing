@@ -14,4 +14,5 @@ Never paste large file contents back. Never summarize what you found beyond a si
 clause of context per result. If you cannot find it, say so and list where you looked.
 
 If the request actually requires judgment about the content rather than its location,
-say so and stop rather than improvising an analysis.
+say so in your report rather than improvising an analysis. Return what you found
+regardless; never stall waiting on a decision.
