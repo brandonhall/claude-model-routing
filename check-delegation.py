@@ -33,6 +33,7 @@ def collect(days):
         cutoff = dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=days)
 
     main, delegated = collections.Counter(), collections.Counter()
+    output = {"main": collections.Counter(), "delegated": collections.Counter()}
     sessions, files = set(), 0
 
     pattern = os.path.expanduser("~/.claude/projects/**/*.jsonl")
@@ -56,8 +57,10 @@ def collect(days):
                         continue
                     try:
                         when = dt.datetime.fromisoformat(stamp.replace("Z", "+00:00"))
-                    except ValueError:
+                    except (ValueError, TypeError):
                         continue
+                    if when.tzinfo is None:
+                        when = when.replace(tzinfo=dt.timezone.utc)
                     if when < cutoff:
                         continue
 
@@ -67,12 +70,15 @@ def collect(days):
                 if not tokens:
                     continue
 
-                bucket = delegated if record.get("isSidechain") else main
-                bucket[message.get("model", "unknown")] += tokens
+                model = message.get("model", "unknown")
+                side = "delegated" if record.get("isSidechain") else "main"
+                bucket = delegated if side == "delegated" else main
+                bucket[model] += tokens
+                output[side][model] += usage.get("output_tokens", 0)
                 if record.get("sessionId"):
                     sessions.add(record["sessionId"])
 
-    return main, delegated, sessions, files
+    return main, delegated, output, sessions, files
 
 
 def show_models(label, counter):
@@ -84,13 +90,23 @@ def show_models(label, counter):
         print(f"  {model:<34}{100 * tokens / total:>6.1f}%")
 
 
+def expensive_share(counter):
+    """Share of these tokens running on an Opus- or Fable-tier model."""
+    total = sum(counter.values())
+    if not total:
+        return 0.0
+    pricey = sum(n for model, n in counter.items() if "opus" in model or "fable" in model)
+    return 100 * pricey / total
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--days", type=int, default=30, help="0 for all history")
     args = parser.parse_args()
 
-    main_tokens, delegated_tokens, sessions, files = collect(args.days)
+    main_tokens, delegated_tokens, output, sessions, files = collect(args.days)
     total = sum(main_tokens.values()) + sum(delegated_tokens.values())
+    out_total = sum(output["main"].values()) + sum(output["delegated"].values())
 
     window = f"last {args.days} days" if args.days else "all history"
     print(f"\nDelegation check ({window})")
@@ -99,7 +115,16 @@ def main():
         print(f"\nNo activity found in {files} transcripts. Try --days 0.\n")
         return
 
-    print(f"{len(sessions)} sessions across {files} transcripts\n")
+    print(f"{len(sessions)} sessions across {files} transcripts")
+
+    print("\nTHE TWO NUMBERS THAT MATTER\n")
+    if out_total:
+        share = 100 * sum(output["delegated"].values()) / out_total
+        print(f"  Work done by assistants          {share:>5.0f}%   (want: up)")
+    print(f"  Delegated work on Opus/Fable     {expensive_share(delegated_tokens):>5.0f}%"
+          f"   (want: near zero)")
+
+    print("\nRaw volume, for reference")
     for label, counter in (("Main session", main_tokens), ("Delegated", delegated_tokens)):
         tokens = sum(counter.values())
         print(f"  {label:<14}{tokens / 1e6:>9,.0f} Mtok{100 * tokens / total:>7.0f}%")
@@ -108,9 +133,9 @@ def main():
     show_models("Delegated work runs on:", delegated_tokens)
 
     print(
-        "\nHigher 'Delegated' is better. This measures where work happened, not "
-        "dollars:\ncached tokens dominate the raw counts and bill at a fraction of "
-        "full price.\n"
+        "\nThe first number uses output tokens, the closest proxy for work actually\n"
+        "performed. Raw volume below is ~95% cached reads, which mostly tracks how\n"
+        "long a session ran rather than where the work went.\n"
     )
 
 

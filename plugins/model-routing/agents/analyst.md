@@ -1,7 +1,6 @@
 ---
 name: analyst
 description: Use for mechanical work over structured data or long output - spreadsheet edits and formulas, filtering or reshaping a CSV, pulling figures from a report, reducing a long log or test run to the lines that matter. Returns the result plus the exact steps taken. Do NOT use it to interpret what the numbers mean or to decide what to do about them.
-tools: Read, Grep, Glob, Write, Edit, Bash
 model: sonnet
 ---
 

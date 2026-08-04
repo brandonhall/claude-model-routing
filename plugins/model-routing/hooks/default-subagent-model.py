@@ -1,11 +1,19 @@
 #!/usr/bin/env python3
-"""Give a subagent a default model when the caller didn't pick one.
+"""Give a generic subagent a default model when the caller didn't pick one.
 
 Without this, a subagent spawned with no explicit model inherits whatever the main
 session is running - so delegating from a Fable session gets you a Fable worker, and
-the handoff saves context but not cost.
+the handoff saves context but not cost. Other plugins (Superpowers dispatches subagents
+in seven skills) spawn generic workers this way.
 
-This only fills a gap. If the caller named a model, it is left alone.
+Two rules, both important:
+
+  1. If the caller named a model, do nothing. Never override a choice.
+  2. If the caller named a *specific* agent, do nothing. A per-invocation model
+     outranks the agent's own `model:` frontmatter, so injecting one here would
+     silently demote an agent that had deliberately pinned a cheaper model.
+
+That leaves exactly the case this is for: a generic worker with no model of its own.
 
 Any failure here is silent and harmless: the spawn proceeds exactly as it would have.
 """
@@ -14,6 +22,10 @@ import json
 import sys
 
 DEFAULT_MODEL = "sonnet"
+
+# Built-in workers that carry no model of their own. Anything else - our five, or
+# any other plugin's agent - defines its own model and must be left alone.
+GENERIC_AGENTS = {"general-purpose", "Explore", "Plan", "claude"}
 
 
 def main():
@@ -26,8 +38,13 @@ def main():
     if not isinstance(tool_input, dict):
         return
 
-    # Never override an explicit choice.
+    # Rule 1: never override an explicit choice.
     if tool_input.get("model"):
+        return
+
+    # Rule 2: never override an agent's own frontmatter.
+    agent = tool_input.get("subagent_type")
+    if agent and agent not in GENERIC_AGENTS:
         return
 
     updated = dict(tool_input)
@@ -37,7 +54,8 @@ def main():
         {
             "hookSpecificOutput": {
                 "hookEventName": "PreToolUse",
-                "permissionDecision": "defer",
+                "permissionDecision": "allow",
+                "permissionDecisionReason": "Defaulted an unpinned subagent to Sonnet.",
                 "updatedInput": updated,
             }
         },

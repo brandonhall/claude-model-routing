@@ -1,7 +1,6 @@
 ---
 name: researcher
 description: Use before a decision that depends on material outside this conversation - product documentation, API references, competitor pages, standards, long PDFs, release notes. Returns a short summary with sources. Do NOT use for material already in the conversation, and do NOT use it to make the decision itself.
-tools: Read, Grep, Glob, WebFetch, WebSearch
 model: sonnet
 ---
 

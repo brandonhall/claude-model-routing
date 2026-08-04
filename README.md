@@ -13,7 +13,7 @@ Five shared assistants that any team member's Claude can hand work off to:
 
 | Assistant    | Runs on | Handles                                           |
 | ------------ | ------- | ------------------------------------------------- |
-| `finder`     | Haiku   | Locating files, docs, tickets, records            |
+| `finder`     | Haiku   | Locating files and strings in the filesystem      |
 | `researcher` | Sonnet  | Reading external documentation and reporting back |
 | `builder`    | Sonnet  | Completing a scoped piece of work end to end      |
 | `analyst`    | Sonnet  | Spreadsheets, data pulls, reducing long output    |
@@ -70,7 +70,8 @@ small and every later turn in that session is cheaper too.
 Everyone picks it up on next sign-in.
 
 For anyone using the Claude Code CLI rather than the desktop app, add this to managed
-settings as well:
+settings as well. **Both keys are needed** — the first registers the source, the second
+actually turns the plugin on. With only the first, people get a prompt they can skip.
 
 ```json
 {
@@ -78,6 +79,9 @@ settings as well:
     "claude-model-routing": {
       "source": { "source": "github", "repo": "YOUR-ORG/claude-model-routing" }
     }
+  },
+  "enabledPlugins": {
+    "model-routing@claude-model-routing": true
   }
 }
 ```
@@ -89,14 +93,20 @@ Each assistant is one short file in `plugins/model-routing/agents/`. Two lines m
 - `model:` which engine it runs on
 - `description:` when Claude should hand work to it
 
-Edit, commit, push. Changes reach everyone on their next sign-in.
+Edit, commit, push — **and bump `version` in
+`plugins/model-routing/.claude-plugin/plugin.json`**. If the version string doesn't
+change, updates are skipped and your edit never reaches anyone.
 
 The session note is in `plugins/model-routing/hooks/session-start`.
 
 ## Checking it worked
 
-Run `/agents` in any session. The five assistants should be listed with the models
-above. If they are, it's live.
+Run `/context` in any session and look under Custom Agents. The five should be listed.
+
+That only proves the *agents* loaded — it reads their definition files, so it passes
+even if both hooks are dead. To confirm the hooks work, spawn a generic subagent from a
+Fable or Opus session and check that the subagent ran on Sonnet. If it ran on Fable, the
+model-default hook isn't taking effect.
 
 For whether it's actually changing behavior, run this on any machine:
 

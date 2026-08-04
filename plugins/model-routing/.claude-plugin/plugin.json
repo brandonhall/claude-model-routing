@@ -1,6 +1,5 @@
 {
   "name": "model-routing",
-  "version": "1.0.0",
-  "description": "Four shared assistants pinned to fast, low-cost models, plus a standing note on when to hand work off.",
-  "installationPreference": "required"
+  "description": "Five shared assistants pinned to fast, low-cost models, plus a standing note on when to hand work off.",
+  "version": "1.1.0"
 }

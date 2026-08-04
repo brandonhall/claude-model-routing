@@ -1,6 +1,6 @@
 ---
 name: finder
-description: Use to locate something before acting on it - which file defines a function, where a document or ticket lives, which records match a condition, who owns a component. Reads across many sources and returns short pointers. Do NOT use it to analyze, summarize, or judge what it finds, and do NOT use it when you already know where the thing is.
+description: Use to locate something in the filesystem before acting on it - which file defines a function, where a config value is set, which files match a pattern, where a string appears across a repo. Reads across many files and returns short pointers with line numbers. Do NOT use it to analyze, summarize, or judge what it finds. Do NOT use it for anything outside the filesystem - tickets, CRM records, or docs in a connected tool are not reachable from here.
 tools: Read, Grep, Glob
 model: haiku
 ---
