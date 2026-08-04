@@ -31,6 +31,21 @@ It also attaches a short note to the start of every session that makes delegatio
 default rather than the exception: the expensive session plans, dispatches, integrates,
 and decides, and hands out everything else. Nobody has to invoke it.
 
+### Subagents that aren't one of these five
+
+Other tools spawn their own subagents — the Superpowers plugin does it in seven
+different skills, for code review, plan execution, and parallel work. None of them name
+a model, so those workers inherit whatever the main session is running. Delegating from
+a Fable session gets you a Fable worker: you save context but not cost.
+
+A second hook fills that gap. When a subagent is spawned **without** an explicit model,
+it gets Sonnet. When one **is** named, the hook leaves it completely alone — it supplies
+a default, it never overrides a choice.
+
+Sonnet rather than Haiku because these generic spawns do real work (a code review, a
+plan step), and Haiku's smaller context window is a poor fit for reading a large diff.
+Haiku stays where it belongs, on `finder`.
+
 ### Why farming out wins even on small tasks
 
 A handoff isn't free — it costs a fresh context plus a report to read back, roughly
@@ -92,6 +107,13 @@ python3 check-delegation.py
 It prints one number — what share of tokens went to assistants rather than the main
 session — plus which models each side ran on. Higher is better. Run it before rollout
 and again a few weeks later; if the delegated share went up, it's working.
+
+Two things to watch in that output:
+
+- **"Delegated" share going up** means the session note is landing.
+- **Opus and Fable disappearing from the "Delegated work runs on" list** means the
+  default-model hook is landing. Any expensive model still showing up under delegated
+  work is a subagent that inherited it from the main session.
 
 It reads only the local logs in `~/.claude/projects`, never prompts, file contents,
 paths, or branch names, and prints only aggregate numbers.
