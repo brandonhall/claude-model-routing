@@ -1,23 +1,26 @@
 # Model routing
 
-Lets people keep Opus or Fable as their main session while the actual work gets farmed
-out to faster, cheaper models. Applies to everyone automatically, with nothing to
-remember or type.
+Use the right model for the job. People keep Opus or Fable as their main session while
+the actual work gets farmed out to faster, cheaper models. One plugin, applied to
+everyone automatically, with nothing to remember or type.
 
 No model is blocked. Anyone can still choose Opus or Fable at any time — that's the
 point. The expensive model stays; it just stops doing the grinding.
 
-## What it adds
+## What it does
 
-Five shared assistants that any team member's Claude can hand work off to:
+Three things, all in the one `model-routing` plugin.
 
-| Assistant    | Runs on | Handles                                           |
-| ------------ | ------- | ------------------------------------------------- |
-| `finder`     | Haiku   | Locating files and strings in the filesystem      |
-| `researcher` | Sonnet  | Reading external documentation and reporting back |
-| `builder`    | Sonnet  | Completing a scoped piece of work end to end      |
-| `analyst`    | Sonnet  | Spreadsheets, data pulls, reducing long output    |
-| `checker`    | Sonnet  | Independently verifying finished work             |
+### 1. Six shared assistants pinned to cheap models
+
+| Assistant    | Runs on | Handles                                                        |
+| ------------ | ------- | -------------------------------------------------------------- |
+| `finder`     | Haiku   | Locating files and strings in the filesystem                   |
+| `editor`     | Haiku   | Mechanical edits with zero design decisions — renames, bumps, moving files, applying a given diff, lint fixes |
+| `researcher` | Sonnet  | Reading external documentation and reporting back              |
+| `analyst`    | Sonnet  | Spreadsheets, data pulls, reducing long output                 |
+| `builder`    | Sonnet  | Completing a scoped piece of work end to end (the default)     |
+| `checker`    | Sonnet  | Independently verifying finished work                          |
 
 The model is fixed in each assistant's file, so this work lands on a fast, low-cost
 model whether or not the person thinks about it. The expensive model stays on the
@@ -27,25 +30,33 @@ Assistants finish their own piece and never stall waiting on a decision — they
 on a stated assumption and flag it. The session owns finishing the whole project, and
 uses `checker` to confirm it rather than trusting its own summary.
 
-The second plugin, `model-routing-note`, attaches a short note to the start of every
-session making delegation the default rather than the exception: the expensive session
-plans, dispatches, integrates, and decides, and hands out everything else. Nobody has to
-invoke it. That one is meant to be piloted first — see Deploy below.
-
-### Subagents that aren't one of these five
+### 2. A default model for every other subagent
 
 Other tools spawn their own subagents — the Superpowers plugin does it in seven
 different skills, for code review, plan execution, and parallel work. None of them name
 a model, so those workers inherit whatever the main session is running. Delegating from
 a Fable session gets you a Fable worker: you save context but not cost.
 
-A second hook fills that gap. When a subagent is spawned **without** an explicit model,
-it gets Sonnet. When one **is** named, the hook leaves it completely alone — it supplies
-a default, it never overrides a choice.
+Measured on one machine on 2026-09-14: the month the main session moved to Fable,
+subagent spend went from 87% Sonnet to 57% Fable, with no change in the kind of work.
+
+A hook fills that gap. When a subagent is spawned **without** an explicit model, it gets
+Sonnet. When one **is** named — on the call, or in an agent's own file — the hook leaves
+it completely alone. It supplies a default, it never overrides a choice.
 
 Sonnet rather than Haiku because these generic spawns do real work (a code review, a
 plan step), and Haiku's smaller context window is a poor fit for reading a large diff.
-Haiku stays where it belongs, on `finder`.
+Haiku stays where it belongs, on `finder` and `editor`.
+
+### 3. A standing note that makes delegation the default
+
+[`ROUTING.md`](ROUTING.md) is attached to the start of every session. It tells the
+expensive session that its job is to plan, dispatch, integrate, and decide — and to
+hand out reading, drafting, running, and grinding. It also tells the session to name a
+model on every worker it spawns itself, cheapest first.
+
+A project can override the note: put your own text at `.claude/routing.md` in the repo
+and the hook injects that instead of the default.
 
 ### Why farming out wins even on small tasks
 
@@ -61,36 +72,23 @@ A handoff isn't free — it costs a fresh context plus a report to read back, ro
 It's better still against 5-hour usage limits, because the main session's context stays
 small and every later turn in that session is cheaper too.
 
+## Other tools (Codex, Cursor, anything that reads AGENTS.md)
+
+Those tools have no hook layer, so the plugin can't pin models for them. What they do
+have is an instruction file. Paste the contents of [`ROUTING.md`](ROUTING.md) into the
+repo's `AGENTS.md` (or the tool's rules file) and the same "plan here, delegate the
+rest, cheapest model first" behaviour applies. Pin the assistants' models in that
+tool's own agent configuration; Codex, for one, has no global default for subagent
+models, so each agent definition needs its own.
+
 ## Deploy
-
-There are **two** plugins here, deployed differently on purpose.
-
-| Plugin               | Who gets it        | Why                                              |
-| -------------------- | ------------------ | ------------------------------------------------ |
-| `model-routing`      | Everyone           | Silent. Nothing changes about how the tool feels. |
-| `model-routing-note` | A pilot group of 3–4 | Changes behavior. Try it before inflicting it.  |
 
 1. Push this repo somewhere the team can reach it. A private GitHub repo is fine.
 2. In Claude admin settings, go to **Organization → Plugins**, add this repo as a
    plugin marketplace.
 3. Set **`model-routing`** to **auto-install** for everyone.
-4. Assign **`model-routing-note`** to a small group only. Pick people who do
-   genuinely different kinds of work — the point is to see how it lands across
-   writing, data, and code, not just one of them.
 
-Everyone picks their assignment up on next sign-in.
-
-### Why the note is piloted rather than shipped
-
-`model-routing` is mechanical: it fixes which model a subagent runs on and nothing
-else. Nobody will notice it, which is exactly why it's safe to give to the whole team.
-
-`model-routing-note` tells sessions to delegate by default, and delegation costs a
-round trip — measured median is about 160 seconds. That's a good trade on a
-half-hour task and a bad one on a quick question. Run it with a few people for a week
-and ask them one thing: **did anything get slower?** If the people doing short,
-conversational work say yes while the people doing long build work say no, the note
-needs a different floor before it goes wide.
+Everyone picks it up on next sign-in.
 
 For anyone using the Claude Code CLI rather than the desktop app, add this to managed
 settings as well. **Both keys are needed** — the first registers the source, the second
@@ -109,6 +107,18 @@ actually turns the plugin on. With only the first, people get a prompt they can 
 }
 ```
 
+Belt and braces for the CLI: `CLAUDE_CODE_SUBAGENT_MODEL=sonnet` in the `env` block of
+settings does the same job as the default-model hook for `general-purpose` agents. It
+does not cover `Explore` or `Plan`; the hook does.
+
+### What to watch after rollout
+
+Delegation costs a round trip — measured median is about 160 seconds. That's a good
+trade on a half-hour task and a bad one on a quick question. After a week, ask people
+one thing: **did anything get slower?** If the people doing short, conversational work
+say yes while the people doing long build work say no, loosen the "delegate when"
+floor in `ROUTING.md` before anything else.
+
 ## Changing it
 
 Each assistant is one short file in `plugins/model-routing/agents/`. Two lines matter:
@@ -116,15 +126,16 @@ Each assistant is one short file in `plugins/model-routing/agents/`. Two lines m
 - `model:` which engine it runs on
 - `description:` when Claude should hand work to it
 
-Edit, commit, push — **and bump `version` in that plugin's
-`.claude-plugin/plugin.json`**. If the version string doesn't change, updates are
-skipped and your edit never reaches anyone.
+The session note is `ROUTING.md` at the repo root; `plugins/model-routing/ROUTING.md`
+is the copy the hook ships, so keep them identical (`cp ROUTING.md plugins/model-routing/`).
 
-The session note is in `plugins/model-routing-note/hooks/session-start`.
+Edit, commit, push — **and bump `version` in
+`plugins/model-routing/.claude-plugin/plugin.json`**. If the version string doesn't
+change, updates are skipped and your edit never reaches anyone.
 
 ## Checking it worked
 
-Run `/context` in any session and look under Custom Agents. The five should be listed.
+Run `/context` in any session and look under Custom Agents. The six should be listed.
 
 That only proves the *agents* loaded — it reads their definition files, so it passes
 even if both hooks are dead. To confirm the hooks work, spawn a generic subagent from a
@@ -150,3 +161,14 @@ Two things to watch in that output:
 
 It reads only the local logs in `~/.claude/projects`, never prompts, file contents,
 paths, or branch names, and prints only aggregate numbers.
+
+## Prior art
+
+Others have built the same idea for Claude Code, none of it cross-tool:
+[claude-model-router-hook](https://github.com/tzachbon/claude-model-router-hook)
+(routes by prompt class, but defaults implementation to Opus),
+[Gearbox](https://github.com/Adityaraj0421/gearbox) (tiered agents plus an escalation
+ladder and verifier — the `editor` agent and the per-project override here are borrowed
+from it), and [TokenWise](https://github.com/CodeShuX/tokenwise) (routing plus a ledger
+of measured savings). Anthropic tracks the native request in
+[claude-code#27665](https://github.com/anthropics/claude-code/issues/27665).
