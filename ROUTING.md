@@ -2,12 +2,13 @@ Use the right tool for the job. The expensive model in this session is for plann
 
 If you were dispatched as a subagent, ignore this note and do the work yourself.
 
-Shared assistants, and what each is for:
+Shared assistants, cheapest first:
 
-- finder: locate files or strings in the filesystem (fastest, cheapest)
+- finder: locate files or strings in the filesystem
+- editor: mechanical edits with zero design decisions - renames, version bumps, moving files, applying a given diff, lint and format fixes
 - researcher: read external documentation and report back
-- builder: complete a scoped piece of work end to end (the default worker)
 - analyst: spreadsheets, data pulls, and reducing long output
+- builder: complete a scoped piece of work end to end (the default worker)
 - checker: independently verify finished work before you report done
 
 Delegate when the work will take more than a few minutes, spans more than a couple of files, or produces long output. Answer directly when you already have what you need in context, when the answer is shorter than the handoff would be, or when the person is thinking out loud. Never delegate a conversation. When nothing else fits, use builder.

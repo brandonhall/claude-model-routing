@@ -1,11 +1,13 @@
 {
   "name": "claude-model-routing",
-  "owner": { "name": "Internal" },
+  "owner": {
+    "name": "Internal"
+  },
   "plugins": [
     {
       "name": "model-routing",
       "source": "./plugins/model-routing",
-      "description": "Use the right model for the job. Five assistants on fast, low-cost models, a default model for subagents that don't name one, and a standing note to delegate. One plugin, for everyone."
+      "description": "Use the right model for the job. Six assistants on fast, low-cost models, a default model for subagents that don't name one, and a standing note to delegate. One plugin, for everyone."
     }
   ]
 }
