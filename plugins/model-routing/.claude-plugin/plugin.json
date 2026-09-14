@@ -1,5 +1,5 @@
 {
   "name": "model-routing",
-  "description": "Five shared assistants pinned to fast, low-cost models, plus a standing note on when to hand work off.",
-  "version": "1.1.1"
+  "description": "Use the right model for the job: five assistants pinned to fast, low-cost models, a Sonnet default for any subagent that names none, and a standing note that makes the expensive session plan and delegate.",
+  "version": "2.0.0"
 }
