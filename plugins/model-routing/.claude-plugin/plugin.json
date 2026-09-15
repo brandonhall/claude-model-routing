@@ -1,5 +1,5 @@
 {
   "name": "model-routing",
-  "description": "Use the right model for the job: nine assistants pinned to fast, low-cost models, a Sonnet default for any subagent that names none, and a standing note that makes the expensive session plan and delegate.",
-  "version": "2.1.1"
+  "description": "Use the right model for the job: a Sonnet session by default, ten assistants pinned to the cheapest model that does each job (one of them the expensive model, on call for decisions), a Sonnet default for any subagent that names none, and a standing note on when to reach up and when to hand down.",
+  "version": "2.2.0"
 }

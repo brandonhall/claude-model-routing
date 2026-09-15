@@ -7,7 +7,7 @@
     {
       "name": "model-routing",
       "source": "./plugins/model-routing",
-      "description": "Use the right model for the job. Nine assistants on fast, low-cost models, a default model for subagents that don't name one, and a standing note to delegate. One plugin, for everyone."
+      "description": "Use the right model for the job. Sonnet by default, ten pinned assistants including an on-call architect on Opus, a default model for subagents that don't name one, and a standing note on when to reach up. One plugin, for everyone."
     }
   ]
 }
