@@ -3,6 +3,12 @@
 Versions track `plugins/model-routing/.claude-plugin/plugin.json`. Bump it with every
 change to the plugin directory, or installed copies never update.
 
+## 2.2.1 — 2026-09-14
+
+- `architect` runs on Fable 5.1 rather than Opus 5. Same list price per token; Fable is
+  the most capable model and its cache reads are cheaper, which suits a brief-driven
+  helper that re-reads little.
+
 ## 2.2.0 — 2026-09-14
 
 The plugin inverts. Sonnet holds the session; the expensive model is on call.
