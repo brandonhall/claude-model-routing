@@ -9,9 +9,10 @@ point. The expensive model stays; it just stops doing the grinding.
 
 ## What it does
 
-Three things, all in the one `model-routing` plugin.
+Three things, all in the one `model-routing` plugin — plus `/model-routing:help`, which
+explains all of it from inside a session (see [Learning about it from a session](#learning-about-it-from-a-session)).
 
-### 1. Six shared assistants pinned to cheap models
+### 1. Nine shared assistants pinned to cheap models
 
 | Assistant    | Runs on | Handles                                                        |
 | ------------ | ------- | -------------------------------------------------------------- |
@@ -19,6 +20,9 @@ Three things, all in the one `model-routing` plugin.
 | `editor`     | Haiku   | Mechanical edits with zero design decisions — renames, bumps, moving files, applying a given diff, lint fixes |
 | `researcher` | Sonnet  | Reading external documentation and reporting back              |
 | `analyst`    | Sonnet  | Spreadsheets, data pulls, reducing long output                 |
+| `tester`     | Sonnet  | Tests for behaviour that already exists; never touches the code under test |
+| `reviewer`   | Sonnet  | Finds what is wrong in a diff or PR; reports, never fixes      |
+| `shipper`    | Sonnet  | Rebase, push, open the PR, read failing checks, answer review threads; never merges |
 | `builder`    | Sonnet  | Completing a scoped piece of work end to end (the default)     |
 | `checker`    | Sonnet  | Independently verifying finished work                          |
 
@@ -139,6 +143,14 @@ one thing: **did anything get slower?** If the people doing short, conversationa
 say yes while the people doing long build work say no, loosen the "delegate when"
 floor in `ROUTING.md` before anything else.
 
+## Learning about it from a session
+
+Type `/model-routing:help` in any session. It reads the plugin's own files and answers
+from them: the assistant table with models, what the two hooks do, how to check it is
+working, and which model a given task would land on. Two built-in views also help:
+`/agents` lists every subagent available to the session, plugin ones included, and
+`/plugin` shows installed plugins with their component inventory.
+
 ## Changing it
 
 Each assistant is one short file in `plugins/model-routing/agents/`. Two lines matter:
@@ -161,7 +173,7 @@ claude plugin details model-routing@claude-model-routing
 ```
 
 The first should show `model-routing` as enabled at the current version; the second
-lists its components — six agents and two hooks. New agents also show up in the
+lists its components — nine agents, two hooks, and one skill. New agents also show up in the
 Agent tool's list at the start of the next session.
 
 That only proves the plugin *loaded* — it reads the definition files, so it passes
