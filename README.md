@@ -157,15 +157,29 @@ actually turns the plugin on. With only the first, people get a prompt they can 
     "model-routing@claude-model-routing": true
   },
   "model": "sonnet",
-  "maxEffortLevel": "high"
+  "maxEffortLevel": "high",
+  "autoCompactWindow": 200000,
+  "bashOutputMaxChars": 15000,
+  "env": {
+    "MAX_MCP_OUTPUT_TOKENS": "10000"
+  }
 }
 ```
 
-The two extra keys are the org defaults this plugin assumes. `model` is a default,
+The extra keys are the org defaults this plugin assumes. `model` is a default,
 not a lock: anyone can `/model fable` for a design session, and the managed value
 reapplies on the next launch. `maxEffortLevel` is a cap: on both audited machines,
 `max` produced *fewer* thinking tokens per request than `high`, so it was buying
 nothing.
+
+`autoCompactWindow` and the two output caps attack the other half of the bill. Every
+step re-sends the whole session history; on the audited machine, requests past the
+hundredth in a session were 72% of top-tier main-session spend, re-reading 470–660K
+tokens to take one small step. A 200K compaction ceiling means no step re-reads more
+than that. The output caps keep long logs from piling into the history in the first
+place; the assistant still sees the tail, where failures are. Cache TTL is deliberately
+left at its default: modelled against real request gaps, the 5-minute TTL would have
+cost 14–26% more than the 1-hour one.
 
 Do **not** add `CLAUDE_CODE_SUBAGENT_MODEL` to the `env` block. Before Claude Code
 2.1.251 that variable outranked both the Agent tool's `model` parameter and an agent's
