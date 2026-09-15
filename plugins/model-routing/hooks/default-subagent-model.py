@@ -13,7 +13,22 @@ Two jobs, both on PreToolUse for Agent/Task:
      agent's own `model:` frontmatter (a per-call model outranks frontmatter, so
      injecting one would silently demote a deliberately cheap agent).
 
+How the model is labelled:
+  - a `model` on the call            -> "named on the call"
+  - one of this plugin's agents      -> its frontmatter pin, "pinned"; matched by the
+                                        bare name as well as `model-routing:<name>`,
+                                        because Claude Code resolves an unambiguous
+                                        plugin agent without the prefix
+  - a generic built-in, no model     -> "defaulted" (and the call is rewritten)
+  - another plugin's namespaced agent-> "its own model"; left alone
+
 Any failure here is silent and harmless: the spawn proceeds exactly as it would have.
+
+Verified against the Claude Code 2.1.221 binary: the PreToolUse output schema accepts
+`additionalContext`, and the PreToolUse hook runner delivers it to the model. An older
+binary drops the line; the default still applies (`permissionDecision: "allow"` plus
+`updatedInput`), so nothing routes differently. Rewriting the input requires answering
+`allow`; `updatedInput` does not work with `ask`.
 
 Known dead zone: under CLAUDE_CODE_COORDINATOR_MODE the Agent tool drops the model
 field entirely, so the default has no effect there. The announcement still fires.
@@ -27,7 +42,16 @@ import sys
 
 DEFAULT_MODEL = "sonnet"
 GENERIC_AGENTS = {"general-purpose", "Explore", "Plan", "claude"}
+PLUGIN_NAMESPACE = "model-routing"
 PLUGIN_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def frontmatter(text):
+    """The fenced YAML block at the top of an agent file, or "" if there is none."""
+    if not text.startswith("---"):
+        return ""
+    end = text.find("\n---", 3)
+    return text[3:end] if end != -1 else ""
 
 
 def pinned_models():
@@ -35,7 +59,7 @@ def pinned_models():
     out = {}
     for path in glob.glob(os.path.join(PLUGIN_ROOT, "agents", "*.md")):
         try:
-            head = open(path, encoding="utf-8").read(2000)
+            head = frontmatter(open(path, encoding="utf-8").read(4000))
         except OSError:
             continue
         name = re.search(r"^name:\s*(\S+)", head, re.M)
@@ -55,9 +79,10 @@ def main():
         return
 
     agent = tool_input.get("subagent_type") or "general-purpose"
-    short = agent.split(":")[-1]
+    namespace, _, short = agent.rpartition(":")
     explicit = tool_input.get("model")
-    pinned = pinned_models().get(short) if agent.startswith("model-routing:") else None
+    ours = namespace in ("", PLUGIN_NAMESPACE)
+    pinned = pinned_models().get(short) if ours else None
 
     updated = None
     if explicit:
@@ -66,6 +91,8 @@ def main():
         model, how = pinned, "pinned"
     elif agent in GENERIC_AGENTS:
         model, how = DEFAULT_MODEL, "defaulted"
+        # Copy everything, then add the one field: updatedInput is validated against
+        # the Agent tool's full schema, so a partial object is rejected.
         updated = dict(tool_input)
         updated["model"] = DEFAULT_MODEL
     else:
