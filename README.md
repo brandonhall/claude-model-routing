@@ -61,15 +61,14 @@ Sonnet rather than Haiku because these generic spawns do real work (a code revie
 plan step), and Haiku's smaller context window is a poor fit for reading a large diff.
 Haiku stays where it belongs, on `finder` and `editor`.
 
-### Every hand-off is announced
+### Every hand-off is named
 
-On every spawn the hook prints one line the person can see, whether or not the
-session says anything: `→ Tester (sonnet, pinned): write regression tests`,
-`→ General-purpose (sonnet, defaulted): scan the repo`, `→ Architect (fable, pinned):
-choose the migration order`. The label says how the model was chosen — named on the
-call, pinned by the assistant's file, or defaulted by the hook. The note also asks the
-session to add the reason in its reply; the printed line is the part that cannot be
-forgotten.
+On every spawn the hook hands the session one line — the assistant, the model, and how
+that model was chosen (named on the call, pinned by the assistant's file, or defaulted
+by the hook) — and the note tells it to state that line in its reply with the reason:
+`→ Tester (sonnet, pinned): write regression tests`. The desktop's own tool row shows
+the assistant name as well. This is deliberately not a pop-up notice: those render
+collapsed in the desktop app and hide the tool row behind a click.
 
 ### 3. A standing note on when to reach up and when to hand down
 

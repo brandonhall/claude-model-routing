@@ -3,6 +3,12 @@
 Versions track `plugins/model-routing/.claude-plugin/plugin.json`. Bump it with every
 change to the plugin directory, or installed copies never update.
 
+## 2.3.2 — 2026-09-15
+
+- The hand-off announcement is no longer a user-facing notice (those render as collapsed
+  rows in the desktop app and hide the tool line). The hook now passes the line to the
+  session as context and the note tells it to state it in the reply.
+
 ## 2.3.1 — 2026-09-15
 
 - The announcement line capitalises the assistant name for display.
