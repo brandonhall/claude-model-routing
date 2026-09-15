@@ -3,6 +3,30 @@
 Versions track `plugins/model-routing/.claude-plugin/plugin.json`. Bump it with every
 change to the plugin directory, or installed copies never update.
 
+## 2.2.0 — 2026-09-14
+
+The plugin inverts. Sonnet holds the session; the expensive model is on call.
+
+- **New `architect` assistant on Opus.** For one expensive decision at a time: a
+  cross-system approach, a bug that survived two fixes, auth / account isolation /
+  payments / production data, a long-lived tradeoff. Takes a compact brief, returns a
+  decision, the rejected alternatives, and a step plan. Never implements.
+- **`ROUTING.md` rewritten.** A Sonnet session does the ordinary work itself and
+  reaches up only on the four named triggers, with a brief rather than the
+  conversation. An Opus or Fable session is told it *is* the architect and should hand
+  the tool loop down.
+- **README: org defaults and what is enforced.** The managed-settings block now
+  carries `model: sonnet` (a default, not a lock), `maxEffortLevel: high` (a cap; `max`
+  was producing fewer thinking tokens than `high` on both audited machines), and the
+  subagent env var. A table says which pieces the harness enforces and which are only
+  words. `availableModels` is documented and deliberately not recommended to start.
+- **README: when to open a Fable session anyway.** Design conversations are the
+  expensive model's real job; nothing here discourages them.
+
+Why: two machines' audits showed 76–86% of top-tier main-session spend on tool-loop
+requests and under 4% on thinking. Pinning subagents fixed the smaller half of the
+bill. This release addresses the larger half without blocking any model.
+
 ## 2.1.1 — 2026-09-14
 
 Corrections from a second machine's audit.

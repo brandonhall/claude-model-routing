@@ -1,17 +1,22 @@
 # Model routing
 
-Use the right model for the job. People keep Opus or Fable as their main session while
-the actual work gets farmed out to faster, cheaper models. One plugin, applied to
-everyone automatically, with nothing to remember or type.
+Use the right model for the job. The session runs on Sonnet by default and does the
+ordinary work itself; the expensive model is on call for the decisions that need it,
+through an `architect` assistant that gets a compact brief instead of the whole
+conversation; and the grinding that is worth parallelising goes to cheap pinned
+assistants. One plugin, applied to everyone automatically, with nothing to remember.
 
-No model is blocked. Anyone can still choose Opus or Fable at any time — that's the
-point. The expensive model stays; it just stops doing the grinding.
+No model is blocked. Anyone can open an Opus or Fable session for a design conversation
+at any time, and that is the right tool for that. The goal is not to take power away;
+it is to stop paying top-tier prices for a tool loop. Two machines' logs on 2026-09-14
+showed 76–86% of top-tier main-session spend going to requests that ran a shell
+command, fetched data, or edited a file, and under 4% to thinking tokens.
 
 ## What it does
 
 Three things, all in the one `model-routing` plugin.
 
-### 1. Nine shared assistants pinned to cheap models
+### 1. Ten shared assistants, each pinned to the cheapest model that does its job
 
 | Assistant    | Runs on | Handles                                                        |
 | ------------ | ------- | -------------------------------------------------------------- |
@@ -24,6 +29,7 @@ Three things, all in the one `model-routing` plugin.
 | `shipper`    | Sonnet  | Rebase, push, open the PR, read failing checks, answer review threads; never merges |
 | `builder`    | Sonnet  | Completing a scoped piece of work end to end (the default)     |
 | `checker`    | Sonnet  | Independently verifying finished work                          |
+| `architect`  | Opus    | On call for one expensive decision at a time — cross-system approach, a bug that survived two fixes, auth / isolation / payments / production data, a long-lived tradeoff. Gets a brief, returns a decision and a step plan. Never implements. |
 
 The model is fixed in each assistant's file, so this work lands on a fast, low-cost
 model whether or not the person thinks about it. The expensive model stays on the
@@ -55,12 +61,14 @@ Sonnet rather than Haiku because these generic spawns do real work (a code revie
 plan step), and Haiku's smaller context window is a poor fit for reading a large diff.
 Haiku stays where it belongs, on `finder` and `editor`.
 
-### 3. A standing note that makes delegation the default
+### 3. A standing note on when to reach up and when to hand down
 
-[`ROUTING.md`](ROUTING.md) is attached to the start of every session. It tells the
-expensive session that its job is to plan, dispatch, integrate, and decide — and to
-hand out reading, drafting, running, and grinding. It also tells the session to name a
-model on every worker it spawns itself, cheapest first.
+[`ROUTING.md`](ROUTING.md) is attached to the start of every session. To a Sonnet
+session it says: do the ordinary work here, reach up to `architect` only for the four
+kinds of decision listed above, and give it a brief rather than the conversation. To an
+Opus or Fable session it says: you are the architect, so decide here and hand the tool
+loop down. Either way it tells the session to name a model on every worker it spawns,
+cheapest first.
 
 A project can override the note: put your own text at `.claude/routing.md` in the repo
 and the hook injects that instead of the default.
@@ -94,6 +102,17 @@ rest, cheapest model first" behaviour applies. Pin the assistants' models in tha
 tool's own agent configuration; Codex, for one, has no global default for subagent
 models, so each agent definition needs its own.
 
+## What is enforced and what is only words
+
+| Piece | Enforced? |
+|---|---|
+| An assistant's pinned `model:` | Yes, by the harness. The one override is a caller naming a model on the call itself; the plugin never does that. |
+| Sonnet default for unnamed spawns | Yes, the hook rewrites the call before it runs. Blind spot: coordinator mode drops the model field. |
+| The routing note | No. It is text the session reads. It shapes behaviour; it does not bind it. |
+| `model` in managed settings | A default, not a lock. `/model` still works. |
+| `maxEffortLevel` in managed settings | A cap. The stricter value from any scope wins. |
+| `availableModels` in managed settings | A real allowlist users cannot widen. Not recommended to start — see below. |
+
 ## Deploy
 
 1. This repo is public on GitHub; a private fork works the same way.
@@ -117,9 +136,30 @@ actually turns the plugin on. With only the first, people get a prompt they can 
   },
   "enabledPlugins": {
     "model-routing@claude-model-routing": true
+  },
+  "model": "sonnet",
+  "maxEffortLevel": "high",
+  "env": {
+    "CLAUDE_CODE_SUBAGENT_MODEL": "sonnet"
   }
 }
 ```
+
+The three extra keys are the org defaults this plugin assumes. `model` is a default,
+not a lock: anyone can `/model fable` for a design session. `maxEffortLevel` is a cap:
+on both audited machines, `max` produced *fewer* thinking tokens per request than
+`high`, so it was buying nothing. The `env` line is belt and braces for the hook.
+
+Do not add an `availableModels` allowlist at first. Run a month, then run
+`model-usage-audit.py`; if Fable sessions are creeping back as tool loops, add it then.
+
+### When to open a Fable or Opus session anyway
+
+Brainstorming a feature for an hour. Working through a design with a person. Reading a
+long document and arguing with it. Anything where the deliverable is the conversation
+itself. That is the 14–24% the expensive model is actually for, and a subagent with a
+brief is the wrong shape for it. The note recognises when it is running on Opus or
+Fable and tells that session to decide there and hand the execution down.
 
 ### Updates are not automatic unless you say so
 
@@ -180,7 +220,7 @@ claude plugin details model-routing@claude-model-routing
 ```
 
 The first should show `model-routing` as enabled at the current version; the second
-lists its components — nine agents and two hooks. New agents also show up in the
+lists its components — ten agents and two hooks. New agents also show up in the
 Agent tool's list at the start of the next session.
 
 That only proves the plugin *loaded* — it reads the definition files, so it passes
