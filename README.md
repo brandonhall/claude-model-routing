@@ -40,8 +40,12 @@ dozen skills, for code review, plan execution, and parallel work. None of them n
 a model, so those workers inherit whatever the main session is running. Delegating from
 a Fable session gets you a Fable worker: you save context but not cost.
 
-Measured on one machine on 2026-09-14: the month the main session moved to Fable,
-subagent spend went from 87% Sonnet to 57% Fable, with no change in the kind of work.
+Measured on one work laptop on 2026-09-14 with `model-usage-audit.py` (one count per
+API message, list prices): in August, 73% of subagent spend was Sonnet; in September,
+after the main session moved to Fable 5.1, 84% of subagent spend was on Fable or Opus
+(61% Fable 5.1), with no change in the kind of work. A second machine whose subagents
+were already mostly Sonnet showed no such swing. Run the script on your own machine
+before assuming either number.
 
 A hook fills that gap. When a subagent is spawned **without** an explicit model, it gets
 Sonnet. When one **is** named — on the call, or in an agent's own file — the hook leaves
@@ -74,8 +78,12 @@ million tokens in/out, Sonnet 5 $2/$10, Haiku 4.5 $1/$5 — list prices as of
 | Sonnet does it, including handoff | ~0.3×         |
 | Haiku does it, including handoff  | ~0.15×        |
 
-It's better still against 5-hour usage limits, because the main session's context stays
-small and every later turn in that session is cheaper too.
+One claim an earlier version of this README made is **not** borne out by the logs:
+that delegating keeps the main session's context small. On two machines and roughly
+2,300 handoffs, sessions that delegated more did not have smaller main contexts
+(correlation +0.04 on one, +0.32 on the other). The report comes back into the main
+context, and the main session still reads the diff. The saving is the price of the
+worker's model, not a smaller main thread.
 
 ## Other tools (Codex, Cursor, anything that reads AGENTS.md)
 
@@ -185,6 +193,23 @@ For whether it's actually changing behavior, run this on any machine:
 ```bash
 python3 check-delegation.py
 ```
+
+For the full picture — dollars by model, main thread versus subagents, what the
+expensive main thread's requests actually did, and whether delegating changed
+main-thread cost per turn — run the deeper one:
+
+```bash
+python3 model-usage-audit.py            # all history
+python3 model-usage-audit.py --days 30  # recent
+```
+
+Both count each API message once (the logs repeat a message's usage once per content
+block, 2–4× depending on the model) and print aggregates only. Section 3 of the audit
+is the one to read first: if most top-tier main-thread spend is on requests that ran a
+shell command, fetched data, or edited a file rather than requests that answered,
+planned, or dispatched, the main session is a tool loop on an expensive model, and the
+cheaper fix is a Sonnet main session with the expensive model held for design and
+decisions — not more delegation from a Fable session.
 
 It prints one number — what share of tokens went to assistants rather than the main
 session — plus which models each side ran on. Higher is better. Run it before rollout

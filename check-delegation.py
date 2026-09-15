@@ -35,6 +35,11 @@ def collect(days):
     main, delegated = collections.Counter(), collections.Counter()
     output = {"main": collections.Counter(), "delegated": collections.Counter()}
     sessions, files = set(), 0
+    # Each API message is logged once per content block, with the same usage object
+    # repeated on every record - and the multiplier differs by model (2x to 4x).
+    # Count each message id once or every share below is skewed toward whichever
+    # model happens to emit more blocks per turn.
+    seen_ids = set()
 
     pattern = os.path.expanduser("~/.claude/projects/**/*.jsonl")
     for path in glob.glob(pattern, recursive=True):
@@ -65,6 +70,10 @@ def collect(days):
                         continue
 
                 message = record.get("message") or {}
+                message_id = message.get("id") or record.get("uuid")
+                if message_id in seen_ids:
+                    continue
+                seen_ids.add(message_id)
                 usage = message.get("usage") or {}
                 tokens = sum(usage.get(field, 0) for field in TOKEN_FIELDS)
                 if not tokens:

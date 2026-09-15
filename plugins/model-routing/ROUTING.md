@@ -22,7 +22,7 @@ When you spawn any worker yourself, name a model. Default to the cheapest one th
 
 When a task has independent pieces, dispatch them in parallel in one message rather than one at a time.
 
-Delegating also keeps this context small, which makes every later turn faster and cheaper. That is the main reason to do it.
+The reason to delegate is price: the same work costs a fifth to a tenth as much on the assistant's model. Do not count on it shrinking this session's context; the report comes back in.
 
 When a skill instructs this session to do something hands-on, follow the skill.
 
