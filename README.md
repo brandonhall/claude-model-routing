@@ -29,7 +29,7 @@ Three things, all in the one `model-routing` plugin.
 | `shipper`    | Sonnet  | Rebase, push, open the PR, read failing checks, answer review threads; never merges |
 | `builder`    | Sonnet  | Completing a scoped piece of work end to end (the default)     |
 | `checker`    | Sonnet  | Independently verifying finished work                          |
-| `architect`  | Opus    | On call for one expensive decision at a time — cross-system approach, a bug that survived two fixes, auth / isolation / payments / production data, a long-lived tradeoff. Gets a brief, returns a decision and a step plan. Never implements. |
+| `architect`  | Fable   | On call for one expensive decision at a time — cross-system approach, a bug that survived two fixes, auth / isolation / payments / production data, a long-lived tradeoff. Gets a brief, returns a decision and a step plan. Never implements. |
 
 The model is fixed in each assistant's file, so this work lands on a fast, low-cost
 model whether or not the person thinks about it. The expensive model stays on the
