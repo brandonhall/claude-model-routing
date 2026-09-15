@@ -3,6 +3,40 @@
 Versions track `plugins/model-routing/.claude-plugin/plugin.json`. Bump it with every
 change to the plugin directory, or installed copies never update.
 
+## 2.3.3 — 2026-09-15
+
+Review fixes, verified against the Claude Code 2.1.221 binary and the current docs.
+
+- **The hook recognises a pinned assistant called by its bare name.** Claude Code
+  resolves an unambiguous plugin agent name without the `model-routing:` prefix; the
+  hook only looked pins up under the prefix, so `architect` (bare) was announced as
+  "its own model, another plugin's agent". Routing was never affected, the pin lives in
+  the frontmatter; the announcement was wrong. A namespaced call to another plugin's
+  agent is still left alone.
+- **Frontmatter is parsed as the fenced block**, not the first 2000 bytes.
+- **README: drop `CLAUDE_CODE_SUBAGENT_MODEL` from the org settings block.** Before
+  2.1.251 it outranks the Agent tool's `model` parameter and an agent's own frontmatter,
+  so it would force `architect` onto Sonnet and override every explicit model.
+- **README: `availableModels` must keep `fable`.** The allowlist governs subagent
+  frontmatter and the Agent tool's `model` parameter, and an excluded subagent runs on
+  a fallback model with no error.
+- **README: `maxEffortLevel` values and version.** `low`/`medium`/`high`/`xhigh`; the
+  "lowest cap from any scope" rule needs 2.1.267.
+- **README: the announcement's transport and version.** `additionalContext` on
+  `PreToolUse` is honoured from 2.1.221; older binaries drop the line and nothing else
+  changes.
+- **README: `Explore`'s default.** Built-in `Explore` inherits the session model capped
+  at Opus, so the Sonnet default is a real step down from a Fable or Opus session.
+- **README: the `allow` the hook returns.** Rewriting the call requires answering
+  `allow`, so a defaulted generic spawn skips the permission prompt. Now in the
+  enforced-versus-words table.
+- **Correction to the 2.2.1 rationale.** Fable's cheaper cache *reads* do not help a
+  brief-driven one-shot helper; a fresh context pays cache *writes* at 2× Opus. On the
+  audited token mix Fable 5.1 and Opus 5 cost the same overall. `architect` stays on
+  Fable because it is the most capable model, not because it is cheaper here.
+- `model-usage-audit.py` gets its docstring back, so `--help` states that it reads only
+  local logs and prints only aggregates.
+
 ## 2.3.2 — 2026-09-15
 
 - The hand-off announcement is no longer a user-facing notice (those render as collapsed

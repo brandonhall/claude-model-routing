@@ -14,7 +14,7 @@ command, fetched data, or edited a file, and under 4% to thinking tokens.
 
 ## What it does
 
-Three things, all in the one `model-routing` plugin.
+Four things, all in the one `model-routing` plugin.
 
 ### 1. Ten shared assistants, each pinned to the cheapest model that does its job
 
@@ -61,6 +61,11 @@ Sonnet rather than Haiku because these generic spawns do real work (a code revie
 plan step), and Haiku's smaller context window is a poor fit for reading a large diff.
 Haiku stays where it belongs, on `finder` and `editor`.
 
+The built-in `Explore` agent is the one worth knowing about: on claude.ai accounts it
+inherits the session's model capped at Opus, so from a Fable or Opus session it ran on
+Opus before this hook existed, and `CLAUDE_CODE_SUBAGENT_MODEL` never touched it. The
+hook's Sonnet default is a real step down there, not a no-op.
+
 ### Every hand-off is named
 
 On every spawn the hook hands the session one line — the assistant, the model, and how
@@ -69,6 +74,11 @@ by the hook) — and the note tells it to state that line in its reply with the 
 `→ Tester (sonnet, pinned): write regression tests`. The desktop's own tool row shows
 the assistant name as well. This is deliberately not a pop-up notice: those render
 collapsed in the desktop app and hide the tool row behind a click.
+
+The line travels as `additionalContext` on the `PreToolUse` hook, which Claude Code
+honours from 2.1.221 (verified in that binary's hook schema and runner). On an older
+binary the line is dropped silently and nothing else changes: the Sonnet default still
+applies, so the failure mode is a missing sentence, not a wrong model.
 
 ### 3. A standing note on when to reach up and when to hand down
 
@@ -116,11 +126,11 @@ models, so each agent definition needs its own.
 | Piece | Enforced? |
 |---|---|
 | An assistant's pinned `model:` | Yes, by the harness. The one override is a caller naming a model on the call itself; the plugin never does that. |
-| Sonnet default for unnamed spawns | Yes, the hook rewrites the call before it runs. Blind spot: coordinator mode drops the model field. |
+| Sonnet default for unnamed spawns | Yes, the hook rewrites the call before it runs. To rewrite it the hook must also answer `allow`, so a generic spawn skips any permission prompt it would otherwise get (`updatedInput` does not work with `ask`). Blind spot: coordinator mode drops the model field. |
 | The routing note | No. It is text the session reads. It shapes behaviour; it does not bind it. |
 | `model` in managed settings | A default, not a lock. `/model` still works. |
-| `maxEffortLevel` in managed settings | A cap. The stricter value from any scope wins. |
-| `availableModels` in managed settings | A real allowlist users cannot widen. Not recommended to start — see below. |
+| `maxEffortLevel` in managed settings | A cap (`low` / `medium` / `high` / `xhigh`). From 2.1.267 the lowest cap from any scope wins; before that, managed settings win as usual. |
+| `availableModels` in managed settings | A real allowlist users cannot widen. It also governs subagent frontmatter and the Agent tool's `model` parameter, and an excluded subagent runs on a fallback model with no error, so the list must include `fable` or `architect` silently becomes a Sonnet agent. Not recommended to start — see below. |
 
 ## Deploy
 
@@ -147,20 +157,26 @@ actually turns the plugin on. With only the first, people get a prompt they can 
     "model-routing@claude-model-routing": true
   },
   "model": "sonnet",
-  "maxEffortLevel": "high",
-  "env": {
-    "CLAUDE_CODE_SUBAGENT_MODEL": "sonnet"
-  }
+  "maxEffortLevel": "high"
 }
 ```
 
-The three extra keys are the org defaults this plugin assumes. `model` is a default,
-not a lock: anyone can `/model fable` for a design session. `maxEffortLevel` is a cap:
-on both audited machines, `max` produced *fewer* thinking tokens per request than
-`high`, so it was buying nothing. The `env` line is belt and braces for the hook.
+The two extra keys are the org defaults this plugin assumes. `model` is a default,
+not a lock: anyone can `/model fable` for a design session, and the managed value
+reapplies on the next launch. `maxEffortLevel` is a cap: on both audited machines,
+`max` produced *fewer* thinking tokens per request than `high`, so it was buying
+nothing.
+
+Do **not** add `CLAUDE_CODE_SUBAGENT_MODEL` to the `env` block. Before Claude Code
+2.1.251 that variable outranked both the Agent tool's `model` parameter and an agent's
+own `model:` frontmatter, so on any older binary it would force `architect` onto Sonnet
+and override every explicit model a caller passes. The hook already does the job it
+was for, and unlike the variable it covers `Explore` and `Plan`.
 
 Do not add an `availableModels` allowlist at first. Run a month, then run
-`model-usage-audit.py`; if Fable sessions are creeping back as tool loops, add it then.
+`model-usage-audit.py`; if Fable sessions are creeping back as tool loops, add it then,
+and keep `fable` in the list: the allowlist applies to subagent models too, and an
+excluded `architect` degrades to a fallback model without an error.
 
 ### When to open a Fable or Opus session anyway
 
@@ -184,9 +200,10 @@ claude plugin marketplace update claude-model-routing
 claude plugin update model-routing@claude-model-routing
 ```
 
-Belt and braces for the CLI: `CLAUDE_CODE_SUBAGENT_MODEL=sonnet` in the `env` block of
-settings does the same job as the default-model hook for `general-purpose` agents. It
-does not cover `Explore` or `Plan`; the hook does.
+`CLAUDE_CODE_SUBAGENT_MODEL=sonnet` looks like belt and braces for the hook. It is
+not, before Claude Code 2.1.251: there it overrides pinned and per-call models too, so
+it would demote `architect`. Leave it unset and let the hook do this job; it also
+covers `Explore` and `Plan`, which the variable never did.
 
 ### What to watch after rollout
 

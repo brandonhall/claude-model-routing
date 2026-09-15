@@ -1,4 +1,22 @@
 #!/usr/bin/env python3
+"""Model-usage audit for Claude Code transcripts. Prints aggregates only.
+
+Reads ~/.claude/projects/**/*.jsonl (plus the desktop app's Cowork store if present),
+counts each API message once (the logs repeat a message's usage once per content
+block), prices every request at Anthropic list rates, and answers five questions:
+
+  1. Which models did the money go to, main thread vs subagents?
+  2. Inside each model, is the spend context re-reads or output/thinking?
+  3. On the top-tier main thread, what did each request actually DO?
+  4. Does heavier delegation lower main-thread cost per turn?
+  5. What kind of sessions (coding / advisory / research / lookup / chat) spent it?
+
+    python3 model-usage-audit.py                     # everything
+    python3 model-usage-audit.py --days 30           # last 30 days
+    python3 model-usage-audit.py --days 30 --summary # five lines for a thread
+
+Never prints prompt text, file paths, or branch names.
+"""
 import argparse, collections, datetime as dt, json, os, statistics as st
 ROOTS = [
     (os.path.expanduser('~/.claude/projects'), 'code'),
@@ -235,7 +253,7 @@ def summary(msgs, sessions, files, days):
 
 
 if __name__ == '__main__':
-    ap = argparse.ArgumentParser()
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--days', type=int, default=0)
     ap.add_argument('--summary', action='store_true', help='five lines for pasting into a thread')
     a = ap.parse_args()
