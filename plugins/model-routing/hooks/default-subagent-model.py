@@ -72,7 +72,8 @@ def main():
         model, how = "its own model", "another plugin's agent"
 
     desc = (tool_input.get("description") or "").strip()
-    line = f"→ {short} ({model}, {how})" + (f": {desc}" if desc else "")
+    shown = short[:1].upper() + short[1:]
+    line = f"→ {shown} ({model}, {how})" + (f": {desc}" if desc else "")
 
     out = {"systemMessage": line}
     if updated is not None:
