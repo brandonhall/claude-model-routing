@@ -3,10 +3,10 @@
 
 Two jobs, both on PreToolUse for Agent/Task:
 
-  1. Announce. For every spawn, print one user-visible line naming the assistant and
-     the model it will run on, e.g. "→ tester (sonnet): write regression tests".
-     The person sees where the work went and at what price, every time, without the
-     session having to remember to say so.
+  1. Announce. For every spawn, hand the session one line naming the assistant and
+     the model it will run on, e.g. "→ Tester (sonnet, pinned): write regression
+     tests", as context it is told to repeat in its reply. Not a user-facing notice:
+     those render collapsed in the desktop app and bury the tool row.
 
   2. Default. If the caller named no model and the agent is a generic built-in, add
      `model: sonnet`. Never override an explicit choice; never override a named
@@ -75,15 +75,19 @@ def main():
     shown = short[:1].upper() + short[1:]
     line = f"→ {shown} ({model}, {how})" + (f": {desc}" if desc else "")
 
-    out = {"systemMessage": line}
+    # The line goes to the session as context, not to the person as a notice: a
+    # user-facing systemMessage renders as a collapsed notice in the desktop app that
+    # hides the tool row. The routing note tells the session to state the hand-off in
+    # its reply, and this gives it the exact words.
+    hso = {
+        "hookEventName": "PreToolUse",
+        "additionalContext": f"Hand-off: {line}. State this in your reply, with the reason.",
+    }
     if updated is not None:
-        out["hookSpecificOutput"] = {
-            "hookEventName": "PreToolUse",
-            "permissionDecision": "allow",
-            "permissionDecisionReason": "Defaulted an unpinned subagent to Sonnet.",
-            "updatedInput": updated,
-        }
-    json.dump(out, sys.stdout)
+        hso["permissionDecision"] = "allow"
+        hso["permissionDecisionReason"] = "Defaulted an unpinned subagent to Sonnet."
+        hso["updatedInput"] = updated
+    json.dump({"hookSpecificOutput": hso}, sys.stdout)
 
 
 if __name__ == "__main__":
