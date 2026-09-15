@@ -129,7 +129,7 @@ models, so each agent definition needs its own.
 | Sonnet default for unnamed spawns | Yes, the hook rewrites the call before it runs. To rewrite it the hook must also answer `allow`, so a generic spawn skips any permission prompt it would otherwise get (`updatedInput` does not work with `ask`). Blind spot: coordinator mode drops the model field. |
 | The routing note | No. It is text the session reads. It shapes behaviour; it does not bind it. |
 | `model` in managed settings | A default, not a lock. `/model` still works. |
-| `maxEffortLevel` in managed settings | A cap (`low` / `medium` / `high` / `xhigh`). From 2.1.267 the lowest cap from any scope wins; before that, managed settings win as usual. |
+| `maxEffortLevel` in managed settings | A cap (`low` / `medium` / `high` / `xhigh`). From 2.1.267 the lowest cap from any scope wins; before that, managed settings win as usual. Not part of the recommended defaults — see Deploy. |
 | `availableModels` in managed settings | A real allowlist users cannot widen. It also governs subagent frontmatter and the Agent tool's `model` parameter, and an excluded subagent runs on a fallback model with no error, so the list must include `fable` or `architect` silently becomes a Sonnet agent. Not recommended to start — see below. |
 
 ## Deploy
@@ -157,7 +157,6 @@ actually turns the plugin on. With only the first, people get a prompt they can 
     "model-routing@claude-model-routing": true
   },
   "model": "sonnet",
-  "maxEffortLevel": "high",
   "autoCompactWindow": 200000,
   "bashOutputMaxChars": 15000,
   "env": {
@@ -168,9 +167,14 @@ actually turns the plugin on. With only the first, people get a prompt they can 
 
 The extra keys are the org defaults this plugin assumes. `model` is a default,
 not a lock: anyone can `/model fable` for a design session, and the managed value
-reapplies on the next launch. `maxEffortLevel` is a cap: on both audited machines,
-`max` produced *fewer* thinking tokens per request than `high`, so it was buying
-nothing.
+reapplies on the next launch.
+
+There is deliberately no effort cap. An earlier version of this README claimed `max`
+produced fewer thinking tokens than `high`; that was an artefact — the thinking-token
+field only appears in logs from Claude Code 2.1.237 onward, and the `max` sessions
+were mostly older, so they were unmeasured rather than frugal. Effort and model were
+also never separated in the data. What the logs do support is only that thinking is a
+small share of spend at any effort, which is no reason to cap anyone.
 
 `autoCompactWindow` and the two output caps attack the other half of the bill. Every
 step re-sends the whole session history; on the audited machine, requests past the
