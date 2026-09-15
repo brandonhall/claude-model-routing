@@ -282,10 +282,22 @@ expensive main thread's requests actually did, and whether delegating changed
 main-thread cost per turn — run the deeper one:
 
 ```bash
-python3 model-usage-audit.py            # all history
+python3 model-usage-audit.py            # all history, ten sections
 python3 model-usage-audit.py --days 30  # recent
-python3 model-usage-audit.py --days 30 --summary   # five lines, safe to paste in a thread
+python3 model-usage-audit.py --days 30 --summary   # a few lines, safe to paste in a thread
+python3 model-usage-audit.py --days 30 --json      # the same numbers, machine-readable
 ```
+
+What it measures, in order: what the logs on this machine can record (Claude Code
+versions, whether reasoning tokens are present); dollars by model, main session versus
+helpers; what those dollars are made of; what the expensive model's requests actually
+did; cost by depth in the session; how big sessions get and what the history is made
+of; whether delegating changed main-session cost per turn; session kinds; effort, only
+within one model and only on requests that record reasoning; cache timing, modelled;
+and the weekly trend. Three method rules are built in and printed where they apply:
+every count is per API message once (the logs repeat usage per content block);
+reasoning tokens are used only where the field exists (Claude Code 2.1.237+), with the
+coverage shown; effort is never compared across models.
 
 For a pilot, the ask to each person is one line, no clone needed:
 
@@ -293,8 +305,7 @@ For a pilot, the ask to each person is one line, no clone needed:
 curl -fsSL https://raw.githubusercontent.com/brandonhall/claude-model-routing/main/model-usage-audit.py | python3 - --days 30 --summary
 ```
 
-Both count each API message once (the logs repeat a message's usage once per content
-block, 2–4× depending on the model) and print aggregates only. Section 3 of the audit
+Both print aggregates only. Section 3 of the audit
 is the one to read first: if most top-tier main-thread spend is on requests that ran a
 shell command, fetched data, or edited a file rather than requests that answered,
 planned, or dispatched, the main session is a tool loop on an expensive model, and the
