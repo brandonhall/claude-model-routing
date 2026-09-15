@@ -98,13 +98,28 @@ actually turns the plugin on. With only the first, people get a prompt they can 
 {
   "extraKnownMarketplaces": {
     "claude-model-routing": {
-      "source": { "source": "github", "repo": "YOUR-ORG/claude-model-routing" }
+      "source": { "source": "github", "repo": "YOUR-ORG/claude-model-routing" },
+      "autoUpdate": true
     }
   },
   "enabledPlugins": {
     "model-routing@claude-model-routing": true
   }
 }
+```
+
+### Updates are not automatic unless you say so
+
+Claude Code auto-updates plugins from Anthropic's own marketplaces, but a third-party
+marketplace like this one has auto-update **off** by default. `"autoUpdate": true` on the
+entry above turns it on; Claude Code then checks once per session, in the background,
+and applies the new version on the next launch. Anyone who registered the marketplace
+by hand can flip the same switch in `/plugin` → Marketplaces → this marketplace →
+Enable auto-update, or update once with:
+
+```bash
+claude plugin marketplace update claude-model-routing
+claude plugin update model-routing@claude-model-routing
 ```
 
 Belt and braces for the CLI: `CLAUDE_CODE_SUBAGENT_MODEL=sonnet` in the `env` block of
