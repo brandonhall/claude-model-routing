@@ -3,6 +3,22 @@
 Versions track `plugins/model-routing/.claude-plugin/plugin.json`. Bump it with every
 change to the plugin directory, or installed copies never update.
 
+## 2.1.1 — 2026-09-14
+
+Corrections from a second machine's audit.
+
+- **`check-delegation.py` counts each API message once.** The logs repeat a message's
+  usage once per content block, 2–4× depending on the model, so every share it
+  printed was skewed. Same fix applied to the new `model-usage-audit.py`, which also
+  prices by model, splits main thread from subagents, and classifies what each
+  top-tier request did.
+- **`ROUTING.md` no longer claims delegating keeps the main context small.** Two
+  machines, ~2,300 handoffs, no such effect. The reason to delegate is the worker's
+  price.
+- README re-sources the August→September subagent swing to the machine and method it
+  came from (73% Sonnet → 84% top-tier, deduped, list prices) and notes the second
+  machine did not show it.
+
 ## 2.1.0 — 2026-09-14
 
 Three assistants for where the money actually went.
