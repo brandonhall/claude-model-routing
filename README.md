@@ -61,6 +61,16 @@ Sonnet rather than Haiku because these generic spawns do real work (a code revie
 plan step), and Haiku's smaller context window is a poor fit for reading a large diff.
 Haiku stays where it belongs, on `finder` and `editor`.
 
+### Every hand-off is announced
+
+On every spawn the hook prints one line the person can see, whether or not the
+session says anything: `→ tester (sonnet, pinned): write regression tests`,
+`→ general-purpose (sonnet, defaulted): scan the repo`, `→ architect (fable, pinned):
+choose the migration order`. The label says how the model was chosen — named on the
+call, pinned by the assistant's file, or defaulted by the hook. The note also asks the
+session to add the reason in its reply; the printed line is the part that cannot be
+forgotten.
+
 ### 3. A standing note on when to reach up and when to hand down
 
 [`ROUTING.md`](ROUTING.md) is attached to the start of every session. To a Sonnet

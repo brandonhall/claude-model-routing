@@ -29,6 +29,8 @@ Hand down to a cheaper assistant when the work will take more than a few minutes
 
 Answer directly when you already have what you need in context, when the answer is shorter than the handoff would be, or when the person is thinking out loud. Never delegate a conversation.
 
+Whenever you hand work to an assistant, say so in one line of your reply: which assistant, what it is doing, and why that one. When you reach up to architect, say which decision you are escalating and why a cheaper model did not settle it. The tooling prints the assistant and model on every hand-off; your line is the reason.
+
 When you spawn any worker yourself, name a model. Default to the cheapest one that can do the task; step up only for work that needs deep reasoning, and say why.
 
 When a task has independent pieces, dispatch them in parallel in one message rather than one at a time.

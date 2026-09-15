@@ -3,6 +3,19 @@
 Versions track `plugins/model-routing/.claude-plugin/plugin.json`. Bump it with every
 change to the plugin directory, or installed copies never update.
 
+## 2.3.0 — 2026-09-14
+
+Every hand-off is announced.
+
+- **The hook prints one user-visible line on every subagent spawn**: the assistant,
+  the model it will run on, and how that model was chosen (named on the call, pinned by
+  the assistant's file, or defaulted by the hook), plus the call's description. Fires
+  for every Agent call, including other plugins' agents and explicit-model calls; the
+  Sonnet default still applies only to unnamed generic spawns.
+- **`ROUTING.md` asks the session to give the reason** in its reply — which assistant,
+  what it is doing, why that one; for `architect`, which decision is being escalated
+  and why a cheaper model did not settle it.
+
 ## 2.2.1 — 2026-09-14
 
 - `architect` runs on Fable 5.1 rather than Opus 5. Same list price per token; Fable is
