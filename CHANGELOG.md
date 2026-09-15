@@ -3,6 +3,24 @@
 Versions track `plugins/model-routing/.claude-plugin/plugin.json`. Bump it with every
 change to the plugin directory, or installed copies never update.
 
+## 2.1.0 — 2026-09-14
+
+Three assistants for where the money actually went, and a way to ask the plugin about
+itself.
+
+- **`tester` (Sonnet).** Writes tests for behaviour that already exists and never
+  touches the code under test. One scenario per test, fixtures copied exactly, the
+  runner's own pass/fail count reported. Test-writing lanes were 56% of top-tier
+  subagent spend in the September audit.
+- **`reviewer` (Sonnet).** Reads a diff and reports defects with file and line; never
+  fixes. Distinct from `checker`, which asks whether the work is finished. Review
+  passes were the most-spawned subagent in the audit, all generic.
+- **`shipper` (Sonnet).** Rebase, push, open or update the PR, read the failing CI
+  command, answer review threads. Never merges, never force-pushes a shared branch.
+- **`/model-routing:help`.** A skill that reads the plugin's own files and explains the
+  assistants, the hooks, and how to verify routing from inside a session.
+- `ROUTING.md` lists the new assistants, cheapest first.
+
 ## 2.0.0 — 2026-09-14
 
 One plugin instead of two.

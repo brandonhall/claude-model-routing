@@ -8,6 +8,9 @@ Shared assistants, cheapest first:
 - editor: mechanical edits with zero design decisions - renames, version bumps, moving files, applying a given diff, lint and format fixes
 - researcher: read external documentation and report back
 - analyst: spreadsheets, data pulls, and reducing long output
+- tester: write tests for behaviour that already exists; never changes the code under test
+- reviewer: find what is wrong in a diff or PR; reports, never fixes
+- shipper: rebase, push, open the PR, read failing checks, answer review threads; never merges
 - builder: complete a scoped piece of work end to end (the default worker)
 - checker: independently verify finished work before you report done
 
