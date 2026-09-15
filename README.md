@@ -8,9 +8,9 @@ assistants. One plugin, applied to everyone automatically, with nothing to remem
 
 No model is blocked. Anyone can open an Opus or Fable session for a design conversation
 at any time, and that is the right tool for that. The goal is not to take power away;
-it is to stop paying top-tier prices for a tool loop. Two machines' logs on 2026-09-14
-showed 76–86% of top-tier main-session spend going to requests that ran a shell
-command, fetched data, or edited a file, and under 4% to thinking tokens.
+it is to stop paying top-tier prices for a tool loop. An audit on 2026-09-14 showed
+76% of top-tier main-session spend going to requests that ran a shell command,
+fetched data, or edited a file, and about 3% to thinking tokens.
 
 ## What it does
 
@@ -49,9 +49,9 @@ a Fable session gets you a Fable worker: you save context but not cost.
 Measured on one work laptop on 2026-09-14 with `model-usage-audit.py` (one count per
 API message, list prices): in August, 73% of subagent spend was Sonnet; in September,
 after the main session moved to Fable 5.1, 84% of subagent spend was on Fable or Opus
-(61% Fable 5.1), with no change in the kind of work. A second machine whose subagents
-were already mostly Sonnet showed no such swing. Run the script on your own machine
-before assuming either number.
+(61% Fable 5.1), with no change in the kind of work. A machine whose subagents are
+already mostly Sonnet will not show that swing. Run the script on your own machine
+before assuming the number.
 
 A hook fills that gap. When a subagent is spawned **without** an explicit model, it gets
 Sonnet. When one **is** named — on the call, or in an agent's own file — the hook leaves
@@ -106,9 +106,8 @@ million tokens in/out, Sonnet 5 $2/$10, Haiku 4.5 $1/$5 — list prices as of
 | Haiku does it, including handoff  | ~0.15×        |
 
 One claim an earlier version of this README made is **not** borne out by the logs:
-that delegating keeps the main session's context small. On two machines and roughly
-2,300 handoffs, sessions that delegated more did not have smaller main contexts
-(correlation +0.04 on one, +0.32 on the other). The report comes back into the main
+that delegating keeps the main session's context small. Across roughly 2,300 handoffs,
+sessions that delegated more did not have smaller main contexts (correlation +0.04). The report comes back into the main
 context, and the main session still reads the diff. The saving is the price of the
 worker's model, not a smaller main thread.
 
