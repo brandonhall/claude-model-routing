@@ -32,8 +32,8 @@ uses `checker` to confirm it rather than trusting its own summary.
 
 ### 2. A default model for every other subagent
 
-Other tools spawn their own subagents — the Superpowers plugin does it in seven
-different skills, for code review, plan execution, and parallel work. None of them name
+Other tools spawn their own subagents — the Superpowers plugin does it in half a
+dozen skills, for code review, plan execution, and parallel work. None of them name
 a model, so those workers inherit whatever the main session is running. Delegating from
 a Fable session gets you a Fable worker: you save context but not cost.
 
@@ -61,12 +61,14 @@ and the hook injects that instead of the default.
 ### Why farming out wins even on small tasks
 
 A handoff isn't free — it costs a fresh context plus a report to read back, roughly
-1.5× the raw tokens. But the model prices are 3–10× apart, so the trade is lopsided:
+1.5× the raw tokens. But the model prices are 5–10× apart (Fable 5.1 $10/$50 per
+million tokens in/out, Sonnet 5 $2/$10, Haiku 4.5 $1/$5 — list prices as of
+2026-09), so the trade is lopsided:
 
 | Path                              | Relative cost |
 | --------------------------------- | ------------- |
 | Fable does it directly            | 1.0×          |
-| Sonnet does it, including handoff | ~0.45×        |
+| Sonnet does it, including handoff | ~0.3×         |
 | Haiku does it, including handoff  | ~0.15×        |
 
 It's better still against 5-hour usage limits, because the main session's context stays
@@ -83,12 +85,12 @@ models, so each agent definition needs its own.
 
 ## Deploy
 
-1. Push this repo somewhere the team can reach it. A private GitHub repo is fine.
-2. In Claude admin settings, go to **Organization → Plugins**, add this repo as a
-   plugin marketplace.
-3. Set **`model-routing`** to **auto-install** for everyone.
-
-Everyone picks it up on next sign-in.
+1. This repo is public on GitHub; a private fork works the same way.
+2. In Claude admin settings, go to **Organization settings → Plugins** and add the
+   repo as a plugin marketplace.
+3. Mark **`model-routing`** as **Installed by default**. It then appears in every
+   member's installed list with no action on their part; members can still
+   uninstall it.
 
 For anyone using the Claude Code CLI rather than the desktop app, add this to managed
 settings as well. **Both keys are needed** — the first registers the source, the second
@@ -128,8 +130,11 @@ does not cover `Explore` or `Plan`; the hook does.
 
 ### What to watch after rollout
 
-Delegation costs a round trip — measured median is about 160 seconds. That's a good
-trade on a half-hour task and a bad one on a quick question. After a week, ask people
+Delegation costs a round trip. Measured on one machine over the 60 days to
+2026-09-14, across 2,300 handoffs, the median was about 10 minutes, with the middle
+half between 5 and 22 minutes — most of that is the assistant doing real work, not
+overhead, but it is time the person waits. That's a good trade on a half-hour task
+and a bad one on a quick question. After a week, ask people
 one thing: **did anything get slower?** If the people doing short, conversational work
 say yes while the people doing long build work say no, loosen the "delegate when"
 floor in `ROUTING.md` before anything else.
@@ -150,9 +155,16 @@ change, updates are skipped and your edit never reaches anyone.
 
 ## Checking it worked
 
-Run `/context` in any session and look under Custom Agents. The six should be listed.
+```bash
+claude plugin list
+claude plugin details model-routing@claude-model-routing
+```
 
-That only proves the *agents* loaded — it reads their definition files, so it passes
+The first should show `model-routing` as enabled at the current version; the second
+lists its components — six agents and two hooks. New agents also show up in the
+Agent tool's list at the start of the next session.
+
+That only proves the plugin *loaded* — it reads the definition files, so it passes
 even if both hooks are dead. To confirm the hooks work, spawn a generic subagent from a
 Fable or Opus session and check that the subagent ran on Sonnet. If it ran on Fable, the
 model-default hook isn't taking effect.
