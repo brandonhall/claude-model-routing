@@ -5,8 +5,7 @@ change to the plugin directory, or installed copies never update.
 
 ## 2.1.0 — 2026-09-14
 
-Three assistants for where the money actually went, and a way to ask the plugin about
-itself.
+Three assistants for where the money actually went.
 
 - **`tester` (Sonnet).** Writes tests for behaviour that already exists and never
   touches the code under test. One scenario per test, fixtures copied exactly, the
@@ -17,8 +16,6 @@ itself.
   passes were the most-spawned subagent in the audit, all generic.
 - **`shipper` (Sonnet).** Rebase, push, open or update the PR, read the failing CI
   command, answer review threads. Never merges, never force-pushes a shared branch.
-- **`/model-routing:help`.** A skill that reads the plugin's own files and explains the
-  assistants, the hooks, and how to verify routing from inside a session.
 - `ROUTING.md` lists the new assistants, cheapest first.
 
 ## 2.0.0 — 2026-09-14
