@@ -3,6 +3,10 @@
 Versions track `plugins/model-routing/.claude-plugin/plugin.json`. Bump it with every
 change to the plugin directory, or installed copies never update.
 
+## 2.3.1 — 2026-09-15
+
+- The announcement line capitalises the assistant name for display.
+
 ## 2.3.0 — 2026-09-14
 
 Every hand-off is announced.

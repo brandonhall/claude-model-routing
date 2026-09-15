@@ -64,8 +64,8 @@ Haiku stays where it belongs, on `finder` and `editor`.
 ### Every hand-off is announced
 
 On every spawn the hook prints one line the person can see, whether or not the
-session says anything: `→ tester (sonnet, pinned): write regression tests`,
-`→ general-purpose (sonnet, defaulted): scan the repo`, `→ architect (fable, pinned):
+session says anything: `→ Tester (sonnet, pinned): write regression tests`,
+`→ General-purpose (sonnet, defaulted): scan the repo`, `→ Architect (fable, pinned):
 choose the migration order`. The label says how the model was chosen — named on the
 call, pinned by the assistant's file, or defaulted by the hook. The note also asks the
 session to add the reason in its reply; the printed line is the part that cannot be
