@@ -27,6 +27,8 @@ Hand down to a cheaper assistant when the work will take more than a few minutes
 - builder: complete a scoped piece of work end to end (the default worker)
 - checker: independently verify finished work before you report done
 
+Keep this session's history small; every step re-reads all of it. Keep command output short (tail, grep, counts), send long output to analyst, and when the person starts an unrelated task, say so and suggest /clear or a new session before continuing.
+
 Answer directly when you already have what you need in context, when the answer is shorter than the handoff would be, or when the person is thinking out loud. Never delegate a conversation.
 
 Whenever you hand work to an assistant, say so in one line of your reply: which assistant, what it is doing, and why that one. When you reach up to architect, say which decision you are escalating and why a cheaper model did not settle it. The tooling prints the assistant and model on every hand-off; your line is the reason.
