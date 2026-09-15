@@ -213,8 +213,31 @@ def report(msgs, sessions, files, days):
     for w in sorted(wk):
         if sum(wk[w].values()) < 20: continue
         print(f"   {w:<12}" + ''.join(f"{money(wk[w][m]):>12}" for m in top5) + f"{money(sum(wk[w].values())):>10}")
+def summary(msgs, sessions, files, days):
+    """Five lines for pasting into a thread. Aggregates only."""
+    L = [e for e in msgs.values() if e['parts']]
+    total = sum(e['cost'] for e in L) or 1
+    top = [e for e in L if any(t in e['model'] for t in TOP_TIER)]
+    top_main = sum(e['cost'] for e in top if not e['sub'])
+    sub_total = sum(e['cost'] for e in L if e['sub']) or 1
+    sub_top = sum(e['cost'] for e in top if e['sub'])
+    tool = sum(e['cost'] for e in top if not e['sub'] and not what(e['tools']).startswith(('text only', 'dispatch')))
+    main_models = collections.Counter()
+    for e in L:
+        if not e['sub']: main_models[short(e['model'])] += e['cost']
+    lead = main_models.most_common(1)[0][0] if main_models else '?'
+    window = f"last {days} days" if days else "all history"
+    print(f"model-usage-audit ({window}, {len(sessions)} sessions)")
+    print(f"  total {money(total)} list-equivalent; main session mostly on {lead}")
+    print(f"  expensive-model spend in the main session: {money(top_main)} ({100*top_main/total:.0f}% of total), of which {100*tool/max(top_main,1):.0f}% was tool-loop work")
+    print(f"  helper (subagent) spend: {money(sub_total)} ({100*sub_total/total:.0f}% of total), of which {100*sub_top/sub_total:.0f}% ran on expensive models")
+    print(f"  requests: {len(L)}; each API message counted once; list prices 2026-09")
+
+
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
     ap.add_argument('--days', type=int, default=0)
+    ap.add_argument('--summary', action='store_true', help='five lines for pasting into a thread')
     a = ap.parse_args()
-    report(*collect(a.days), a.days)
+    data = collect(a.days)
+    (summary if a.summary else report)(*data, a.days)

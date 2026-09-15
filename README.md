@@ -241,6 +241,13 @@ main-thread cost per turn — run the deeper one:
 ```bash
 python3 model-usage-audit.py            # all history
 python3 model-usage-audit.py --days 30  # recent
+python3 model-usage-audit.py --days 30 --summary   # five lines, safe to paste in a thread
+```
+
+For a pilot, the ask to each person is one line, no clone needed:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/brandonhall/claude-model-routing/main/model-usage-audit.py | python3 - --days 30 --summary
 ```
 
 Both count each API message once (the logs repeat a message's usage once per content
