@@ -80,19 +80,19 @@ The plugin inverts. Sonnet holds the session; the expensive model is on call.
   the tool loop down.
 - **README: org defaults and what is enforced.** The managed-settings block now
   carries `model: sonnet` (a default, not a lock), `maxEffortLevel: high` (a cap; `max`
-  was producing fewer thinking tokens than `high` on both audited machines), and the
+  was producing fewer thinking tokens than `high`), and the
   subagent env var. A table says which pieces the harness enforces and which are only
   words. `availableModels` is documented and deliberately not recommended to start.
 - **README: when to open a Fable session anyway.** Design conversations are the
   expensive model's real job; nothing here discourages them.
 
-Why: two machines' audits showed 76–86% of top-tier main-session spend on tool-loop
+Why: the audit showed 76% of top-tier main-session spend on tool-loop
 requests and under 4% on thinking. Pinning subagents fixed the smaller half of the
 bill. This release addresses the larger half without blocking any model.
 
 ## 2.1.1 — 2026-09-14
 
-Corrections from a second machine's audit.
+Corrections from a review pass.
 
 - **`check-delegation.py` counts each API message once.** The logs repeat a message's
   usage once per content block, 2–4× depending on the model, so every share it
