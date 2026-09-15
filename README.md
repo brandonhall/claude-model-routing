@@ -9,8 +9,7 @@ point. The expensive model stays; it just stops doing the grinding.
 
 ## What it does
 
-Three things, all in the one `model-routing` plugin — plus `/model-routing:help`, which
-explains all of it from inside a session (see [Learning about it from a session](#learning-about-it-from-a-session)).
+Three things, all in the one `model-routing` plugin.
 
 ### 1. Nine shared assistants pinned to cheap models
 
@@ -145,11 +144,11 @@ floor in `ROUTING.md` before anything else.
 
 ## Learning about it from a session
 
-Type `/model-routing:help` in any session. It reads the plugin's own files and answers
-from them: the assistant table with models, what the two hooks do, how to check it is
-working, and which model a given task would land on. Two built-in views also help:
-`/agents` lists every subagent available to the session, plugin ones included, and
-`/plugin` shows installed plugins with their component inventory.
+Just ask. The assistant list, with each one's description, and the routing note are in
+every session's context, so "what assistants do I have?" or "which model would this
+land on?" gets answered with no command. There is deliberately no slash command for
+this. For the component inventory, `/plugin` in a session or
+`claude plugin details model-routing@claude-model-routing` in a shell.
 
 ## Changing it
 
@@ -173,7 +172,7 @@ claude plugin details model-routing@claude-model-routing
 ```
 
 The first should show `model-routing` as enabled at the current version; the second
-lists its components — nine agents, two hooks, and one skill. New agents also show up in the
+lists its components — nine agents and two hooks. New agents also show up in the
 Agent tool's list at the start of the next session.
 
 That only proves the plugin *loaded* — it reads the definition files, so it passes
